@@ -1,0 +1,1175 @@
+#pragma warning(disable:4996)
+#include "Grass.h"
+#include "Cost.h"
+#include <windows.h>
+#include <tchar.h>
+#include <math.h>
+#include <string>
+#include <stdio.h>
+#include "Circle.h"
+#include "Triangle.h"
+#include "Rectangle.h"
+#include <stdlib.h>
+#include "Pool.h"
+char	szClassName[] = { "First Window" };
+HWND	hParent;
+// LRESULT 类型是一个32位值，指的是从窗口过程或者回调函数返回的32位值 。 CALLBACK指定此函数为回调函数
+Cost cost(0,0);
+Circle circle;
+Grass grass(0,0);
+Pool pool(0,0);
+RectangleM rectangle(0,0);
+Triangle triangle(0,0,0);
+Circle circlep(0);
+Triangle trianglep(0,0,0);
+RectangleM rectanglep(0,0);
+LRESULT CALLBACK WindowProc(HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lParam)
+{
+	HDC hdc;
+	PAINTSTRUCT ps;
+	RECT rect;
+	HINSTANCE  hInstance;
+	static HWND BUTTON[30];
+	static HWND Text[11];
+	static HWND Edit[20];
+	CHAR wholeprice[64];
+	CHAR wholearea[64];
+	CHAR circleradio[64];
+	CHAR grassprice[64];
+	CHAR grassarea[64];
+	CHAR currenta[64];
+	CHAR currentp[64];
+	CHAR recx[64];
+	CHAR recy[64];
+	CHAR rectanglearea[64];
+	CHAR rectangleprice[64];
+	CHAR tria[64];
+	CHAR trib[64];
+	CHAR tric[64];
+	CHAR trianglearea[64];
+	CHAR triangleprice[64];
+	CHAR poolarea[64];
+	CHAR poolprice[64];
+	switch (uMsg)
+	{
+	case WM_CREATE:
+	{
+		hInstance = ((LPCREATESTRUCT)lParam)->hInstance;
+		BUTTON[0] = CreateWindow("BUTTON", "确定",
+			WS_TABSTOP | WS_VISIBLE | WS_CHILD | BS_DEFPUSHBUTTON, 550, 620, 40, 20,
+			hwnd, NULL, (HINSTANCE)GetWindowLong(hwnd, GWL_HINSTANCE), NULL);
+		BUTTON[1] = CreateWindow("BUTTON", "取消",
+			WS_TABSTOP | WS_VISIBLE | WS_CHILD | BS_DEFPUSHBUTTON, 600, 620, 40, 20,
+			hwnd, NULL, (HINSTANCE)GetWindowLong(hwnd, GWL_HINSTANCE), NULL);
+		Text[0] = CreateWindow("STATIC", "请输入总预算",
+			WS_TABSTOP | WS_VISIBLE | WS_CHILD | BS_DEFPUSHBUTTON, 10, 10, 100, 20,
+			hwnd, NULL, (HINSTANCE)GetWindowLong(hwnd, GWL_HINSTANCE), NULL);
+		Edit[6] = CreateWindow("EDIT", "",
+			WS_VISIBLE | WS_CHILD | WS_BORDER | DT_VCENTER, 110, 10, 60, 20,
+			hwnd, NULL, (HINSTANCE)GetWindowLong(hwnd, GWL_HINSTANCE), NULL);
+		Text[1] = CreateWindow("STATIC", "请输入总面积",
+			WS_TABSTOP | WS_VISIBLE | WS_CHILD | BS_DEFPUSHBUTTON, 10, 30, 100, 20,
+			hwnd, NULL, (HINSTANCE)GetWindowLong(hwnd, GWL_HINSTANCE), NULL);
+		BUTTON[17]= CreateWindow("BUTTON", "确定",
+			WS_TABSTOP | WS_VISIBLE | WS_CHILD | BS_DEFPUSHBUTTON, 10, 50, 30, 20,
+			hwnd, NULL, (HINSTANCE)GetWindowLong(hwnd, GWL_HINSTANCE), NULL);
+		Edit[7] = CreateWindow("EDIT", "",
+			WS_VISIBLE | WS_CHILD | WS_BORDER | DT_VCENTER, 110, 30, 60, 20,
+			hwnd, NULL, (HINSTANCE)GetWindowLong(hwnd, GWL_HINSTANCE), NULL);
+		Text[2] = CreateWindow("STATIC", "当前以用金额为",
+			WS_TABSTOP | WS_VISIBLE | WS_CHILD | BS_DEFPUSHBUTTON, 200, 10, 100, 20,
+			hwnd, NULL, (HINSTANCE)GetWindowLong(hwnd, GWL_HINSTANCE), NULL);
+		Edit[8] = CreateWindow("EDIT", "",
+			WS_VISIBLE | WS_CHILD | WS_BORDER | DT_VCENTER, 310, 10, 60, 20,
+			hwnd, NULL, (HINSTANCE)GetWindowLong(hwnd, GWL_HINSTANCE), NULL);
+		Text[3] = CreateWindow("STATIC", "当前以用面积为",
+			WS_TABSTOP | WS_VISIBLE | WS_CHILD | BS_DEFPUSHBUTTON, 200, 30, 100, 20,
+			hwnd, NULL, (HINSTANCE)GetWindowLong(hwnd, GWL_HINSTANCE), NULL);
+		Edit[9] = CreateWindow("EDIT", "",
+			WS_VISIBLE | WS_CHILD | WS_BORDER | DT_VCENTER, 310, 30, 60, 20,
+			hwnd, NULL, (HINSTANCE)GetWindowLong(hwnd, GWL_HINSTANCE), NULL);
+		Text[4] = CreateWindow("STATIC", "草坪的建立",
+			WS_TABSTOP | WS_VISIBLE | WS_CHILD | BS_LEFT, 300, 100, 200, 20,
+			hwnd, NULL, (HINSTANCE)GetWindowLong(hwnd, GWL_HINSTANCE), NULL);
+		BUTTON[2] = CreateWindow("BUTTON", "建立",
+			WS_TABSTOP | WS_VISIBLE | WS_CHILD | BS_DEFPUSHBUTTON, 275, 140, 30, 20,
+			hwnd, NULL, (HINSTANCE)GetWindowLong(hwnd, GWL_HINSTANCE), NULL);
+		Text[10] = CreateWindow("STATIC", "游泳池的建立",
+			WS_TABSTOP | WS_VISIBLE | WS_CHILD | BS_LEFT, 800, 100, 200, 20,
+			hwnd, NULL, (HINSTANCE)GetWindowLong(hwnd, GWL_HINSTANCE), NULL);
+		BUTTON[9] = CreateWindow("BUTTON", "建立",
+			WS_TABSTOP | WS_VISIBLE | WS_CHILD | BS_DEFPUSHBUTTON, 810, 140, 30, 20,
+			hwnd, NULL, (HINSTANCE)GetWindowLong(hwnd, GWL_HINSTANCE), NULL);
+		break;
+	case WM_COMMAND:
+		if ((HWND)lParam == BUTTON[0])
+		{
+			FILE *fp=fopen("d:\\GRASS\\File\\text1.txt","w");
+			if(cost.currentarea<=cost.complectarea&&cost.currentprice<=cost.complectprice)
+			{
+					if(grass.price!=0&&pool.price==0)
+					{
+						if(circle.r!=0)
+						{
+							FILE *fp = fopen("d:\\VS2015编程项目汇总\\GRASS\\File\\text1.txt", "w");
+							fprintf(fp, "总预算为：%.0f\n总面积为：%.0f\n使用金额：%.0f\n使用面积：%.0f\n当前创建圆形草坪\n草坪面积为:%.0f\n建立草坪使用金额为:%.0f\n"
+							,cost.complectprice, cost.complectarea, cost.currentprice, cost.currentarea,circle.getarea(),circle.getarea()*grass.price);
+							fclose(fp);
+						}
+						if(rectangle.wide!=0&&rectangle.length!=0)
+						{
+							FILE *fp = fopen("d:\\VS2015编程项目汇总\\GRASS\\File\\text1.txt", "w");
+							fprintf(fp, "总预算为：%.0f\n总面积为：%.0f\n使用金额：%.0f\n使用面积：%.0f\n当前创建矩形草坪\n草坪面积为:%.0f\n建立草坪使用金额为:%.0f\n"
+								, cost.complectprice, cost.complectarea, cost.currentprice, cost.currentarea, rectangle.getarea(), rectangle.getarea()*grass.price);
+							fclose(fp);
+						}
+						if(triangle.a!=0&&triangle.b!=0&&triangle.c!=0)
+						{
+							FILE *fp = fopen("d:\\VS2015编程项目汇总\\GRASS\\File\\text1.txt", "w");
+							fprintf(fp, "总预算为：%.0f\n总面积为：%.0f\n使用金额：%.0f\n使用面积：%.0f\n当前创建三角形草坪\n草坪面积为:%.0f\n建立草坪使用金额为:%.0f\n"
+								, cost.complectprice, cost.complectarea, cost.currentprice, cost.currentarea, triangle.getarea(),triangle.getarea()*grass.price);
+							fclose(fp);
+						}
+					}
+					if(pool.price!=0&&grass.price==0)
+					{
+						if (circlep.r != 0)
+						{
+							FILE *fp = fopen("d:\\VS2015编程项目汇总\\GRASS\\File\\text1.txt", "w");
+							fprintf(fp, "总预算为：%.0f\n总面积为：%.0f\n使用金额：%.0f\n使用面积：%.0f\n当前创建圆形草坪\n草坪面积为:%f\n建立草坪使用金额为:%f\n"
+								, cost.complectprice, cost.complectarea, cost.currentprice, cost.currentarea, circlep.getarea(), circlep.getarea()*grass.price);
+							fclose(fp);
+						}
+						if (rectanglep.wide != 0 && rectanglep.length != 0)
+						{
+							FILE *fp = fopen("d:\\VS2015编程项目汇总\\GRASS\\File\\text1.txt", "w");
+							fprintf(fp, "总预算为：%f\n总面积为：%f\n使用金额：%f\n使用面积：.0%f\n当前创建矩形草坪\n草坪面积为:%f\n建立草坪使用金额为:%f\n"
+								, cost.complectprice, cost.complectarea, cost.currentprice, cost.currentarea, rectanglep.getarea(), rectanglep.getarea()*grass.price);
+							fclose(fp);
+						}
+						if (trianglep.a != 0 && trianglep.b != 0 && trianglep.c != 0)
+						{
+							FILE *fp = fopen("d:\\VS2015编程项目汇总\\GRASS\\File\\text1.txt", "w");
+							fprintf(fp, "总预算为：%.0f\n总面积为：%.0f\n使用金额：%.0f\n使用面积：%.0f\n当前创建三角形草坪\n草坪面积为:%.0f\n建立草坪使用金额为:%.0f\n"
+								, cost.complectprice, cost.complectarea, cost.currentprice, cost.currentarea, trianglep.getarea(),trianglep.getarea()*grass.price);
+							fclose(fp);
+						}
+					}
+					if(pool.price!=0&&grass.price!=0)
+					{
+						if(circle.r!=0&&circlep.r!=0)
+						{
+							FILE *fp = fopen("d:\\VS2015编程项目汇总\\GRASS\\File\\text1.txt", "w");
+							fprintf(fp, "总预算为：%.0f\n总面积为：%.0f\n使用金额：%.0f\n使用面积：%.0f\n创建圆形草坪\n草坪面积为:%.0f\n建立草坪使用金额为:%.0f\n创建圆形游泳池\n泳池面积为：%.0f\n建立泳池使用金额为:%.0f\n"
+								, cost.complectprice, cost.complectarea, cost.currentprice, cost.currentarea, circle.getarea(), circle.getarea()*grass.price,circlep.getarea(),circlep.getarea()*pool.price);
+							fclose(fp);
+						}
+						if(circle.r!=0&&rectanglep.length!=0&&rectanglep.wide!=0)
+						{
+							FILE *fp = fopen("d:\\VS2015编程项目汇总\\GRASS\\File\\text1.txt", "w");
+							fprintf(fp, "总预算为：%.0f\n总面积为：%.0f\n使用金额：%.0f\n使用面积：%.0f\n创建圆形草坪\n草坪面积为:%.0f\n建立草坪使用金额为:%.0f\n创建矩形游泳池\n泳池面积为：%.0f\n建立泳池使用金额为:%.0f\n"
+								, cost.complectprice, cost.complectarea, cost.currentprice, cost.currentarea, circle.getarea(), circle.getarea()*grass.price, rectanglep.getarea(), rectanglep.getarea()*pool.price);
+							fclose(fp);
+						}
+						if(circle.r!=0&&trianglep.a!=0&&trianglep.b!=0&&trianglep.c!=0)
+						{
+							FILE *fp = fopen("d:\\VS2015编程项目汇总\\GRASS\\File\\text1.txt", "w");
+							fprintf(fp, "总预算为：%.0f\n总面积为：%.0f\n使用金额：%.0f\n使用面积：%.0f\n创建圆形草坪\n草坪面积为:%.0f\n建立草坪使用金额为:%.0f\n创建三角型游泳池\n泳池面积为：%.0f\n建立泳池使用金额为:%.0f\n"
+								, cost.complectprice, cost.complectarea, cost.currentprice, cost.currentarea, circle.getarea(), circle.getarea()*grass.price, trianglep.getarea(), trianglep.getarea()*pool.price);
+							fclose(fp);
+						}
+						if(rectangle.length!=0&&rectangle.wide!=0&&circlep.r!=0)
+						{
+							FILE *fp = fopen("d:\\VS2015编程项目汇总\\GRASS\\File\\text1.txt", "w");
+							fprintf(fp, "总预算为：%.0f\n总面积为：%.0f\n使用金额：%.0f\n使用面积：%.0f\n创建矩形草坪\n草坪面积为:%.0f\n建立草坪使用金额为:%.0f\n创建圆形游泳池\n泳池面积为：%.0f\n建立泳池使用金额为:%.0f\n"
+								, cost.complectprice, cost.complectarea, cost.currentprice, cost.currentarea, rectangle.getarea(), rectangle.getarea()*grass.price, circlep.getarea(),circlep.getarea()*pool.price);
+							fclose(fp);
+						}
+						if(rectangle.length!=0&&rectangle.wide!=0&&rectanglep.length!=0&&rectanglep.wide!=0)
+						{
+							FILE *fp = fopen("d:\\VS2015编程项目汇总\\GRASS\\File\\text1.txt", "w");
+							fprintf(fp, "总预算为：%.0f\n总面积为：%.0f\n使用金额：%.0f\n使用面积：%.0f\n创建矩形草坪\n草坪面积为:%.0f\n建立草坪使用金额为:%.0f\n创建矩形游泳池\n泳池面积为：%.0f\n建立泳池使用金额为:%.0f\n"
+								, cost.complectprice, cost.complectarea, cost.currentprice, cost.currentarea, rectangle.getarea(), rectangle.getarea()*grass.price, rectanglep.getarea(),rectanglep.getarea()*pool.price);
+							fclose(fp);
+						}
+						if(rectangle.length != 0 && rectangle.wide != 0 &&triangle.a!=0&&triangle.b!=0&&triangle.c!=0 )
+						{
+							FILE *fp = fopen("d:\\VS2015编程项目汇总\\GRASS\\File\\text1.txt", "w");
+							fprintf(fp, "总预算为：%.0f\n总面积为：%.0f\n使用金额：%.0f\n使用面积：%.0f\n创建矩形草坪\n草坪面积为:%.0f\n建立草坪使用金额为:%.0f\n创建三角型游泳池\n泳池面积为：%.0f\n建立泳池使用金额为:%.0f\n"
+								, cost.complectprice, cost.complectarea, cost.currentprice, cost.currentarea, rectangle.getarea(), rectangle.getarea()*grass.price, trianglep.getarea(), trianglep.getarea()*pool.price);
+							fclose(fp);
+						}
+						if(triangle.a!=0&&triangle.b!=0&&triangle.c!=0&&circlep.r!=0)
+						{
+							FILE *fp = fopen("d:\\VS2015编程项目汇总\\GRASS\\File\\text1.txt", "w");
+							fprintf(fp, "总预算为：%.0f\n总面积为：%.0f\n使用金额：%.0f\n使用面积：%.0f\n创建三角形草坪\n草坪面积为:%.0f\n建立草坪使用金额为:%.0f\n创建圆形游泳池\n泳池面积为：%.0f\n建立泳池使用金额为:%.0f\n"
+								, cost.complectprice, cost.complectarea, cost.currentprice, cost.currentarea, triangle.getarea(), triangle.getarea()*grass.price, circlep.getarea(), circlep.getarea()*pool.price);
+							fclose(fp);
+						}
+						if(triangle.a != 0 && triangle.b != 0 && triangle.c != 0&&rectanglep.length!=0&&rectanglep.wide!=0)
+						{
+							FILE *fp = fopen("d:\\VS2015编程项目汇总\\GRASS\\File\\text1.txt", "w");
+							fprintf(fp, "总预算为：%.0f\n总面积为：%.0f\n使用金额：%.0f\n使用面积：%.0f\n创建三角形草坪\n草坪面积为:%.0f\n建立草坪使用金额为:%.0f\n创建矩形游泳池\n泳池面积为：%.0f\n建立泳池使用金额为:%.0f\n"
+								, cost.complectprice, cost.complectarea, cost.currentprice, cost.currentarea, triangle.getarea(), triangle.getarea()*grass.price, rectanglep.getarea(), rectanglep.getarea()*pool.price);
+							fclose(fp);
+						}
+						if(triangle.a != 0 && triangle.b != 0 && triangle.c != 0 && trianglep.a!=0&&trianglep.b!=0&&trianglep.c!=0)
+						{
+							FILE *fp = fopen("d:\\VS2015编程项目汇总\\GRASS\\File\\text1.txt", "w");
+							fprintf(fp, "总预算为：%.0f\n总面积为：%.0f\n使用金额：%.0f\n使用面积：%.0f\n创建三角形草坪\n草坪面积为:%.0f\n建立草坪使用金额为:%.0f\n创建三角形游泳池\n泳池面积为：%.0f\n建立泳池使用金额为:%.0f\n"
+								, cost.complectprice, cost.complectarea, cost.currentprice, cost.currentarea, triangle.getarea(), triangle.getarea()*grass.price, trianglep.getarea(),trianglep.getarea()*pool.price);
+							fclose(fp);
+						}
+					}
+			}
+			else
+			{
+				MessageBox(NULL, TEXT("当前金额或面积大于预算"), TEXT("提示"), MB_YESNO| MB_ICONQUESTION);
+			}
+		}
+		if ((HWND)lParam == BUTTON[17])
+		{
+			GetWindowText(Edit[6], wholeprice, 64);
+			GetWindowText(Edit[7], wholearea, 64);
+			cost.complectprice=atof(wholeprice);
+			cost.complectarea=atof(wholearea);
+			SetWindowText(Edit[8],"0");
+			SetWindowText(Edit[9],"0");
+		}
+		if ((HWND)lParam == BUTTON[2])
+		{
+			Text[5] = CreateWindow("STATIC", "选择草坪的形状",
+				WS_TABSTOP | WS_VISIBLE | WS_CHILD | BS_LEFT, 300, 180, 200, 20,
+				hwnd, NULL, (HINSTANCE)GetWindowLong(hwnd, GWL_HINSTANCE), NULL);
+			BUTTON[3] = CreateWindow("BUTTON", "圆形",
+				WS_TABSTOP | WS_VISIBLE | WS_CHILD | BS_DEFPUSHBUTTON, 250, 220, 30, 20,
+				hwnd, NULL, (HINSTANCE)GetWindowLong(hwnd, GWL_HINSTANCE), NULL);
+			BUTTON[4] = CreateWindow("BUTTON", "矩形",
+				WS_TABSTOP | WS_VISIBLE | WS_CHILD | BS_DEFPUSHBUTTON, 300, 220, 30, 20,
+				hwnd, NULL, (HINSTANCE)GetWindowLong(hwnd, GWL_HINSTANCE), NULL);
+			BUTTON[5] = CreateWindow("BUTTON", "三角形",
+				WS_TABSTOP | WS_VISIBLE | WS_CHILD | BS_DEFPUSHBUTTON, 350, 220, 50, 20,
+				hwnd, NULL, (HINSTANCE)GetWindowLong(hwnd, GWL_HINSTANCE), NULL);
+
+		}
+		if ((HWND)lParam == BUTTON[3])
+		{
+			
+			Text[6] = CreateWindow("STATIC", "请输入圆形的半径",
+				WS_TABSTOP | WS_VISIBLE | WS_CHILD | BS_LEFT, 250, 280, 200, 20,
+				hwnd, NULL, (HINSTANCE)GetWindowLong(hwnd, GWL_HINSTANCE), NULL);
+			Edit[0] = CreateWindow("EDIT", "",
+				WS_VISIBLE | WS_CHILD | WS_BORDER | DT_VCENTER, 410, 280, 100, 20,
+				hwnd, NULL, (HINSTANCE)GetWindowLong(hwnd, GWL_HINSTANCE), NULL);
+			Text[7] = CreateWindow("STATIC", "请选择草坪的档次",
+				WS_TABSTOP | WS_VISIBLE | WS_CHILD | BS_LEFT, 250, 320, 200, 20,
+				hwnd, NULL, (HINSTANCE)GetWindowLong(hwnd, GWL_HINSTANCE), NULL);
+			BUTTON[6] = CreateWindow("BUTTON", "高级草",
+				WS_TABSTOP | WS_VISIBLE | WS_CHILD | BS_DEFPUSHBUTTON, 220, 350, 50, 20,
+				hwnd, NULL, (HINSTANCE)GetWindowLong(hwnd, GWL_HINSTANCE), NULL);
+			BUTTON[7] = CreateWindow("BUTTON", "中级草",
+				WS_TABSTOP | WS_VISIBLE | WS_CHILD | BS_DEFPUSHBUTTON, 270, 350, 50, 20,
+				hwnd, NULL, (HINSTANCE)GetWindowLong(hwnd, GWL_HINSTANCE), NULL);
+			BUTTON[8] = CreateWindow("BUTTON", "初级草",
+				WS_TABSTOP | WS_VISIBLE | WS_CHILD | BS_DEFPUSHBUTTON, 320, 350, 50, 20,
+				hwnd, NULL, (HINSTANCE)GetWindowLong(hwnd, GWL_HINSTANCE), NULL);
+		}
+		if ((HWND)lParam == BUTTON[4])
+		{
+			Text[6] = CreateWindow("STATIC", "请输入矩形的长和宽",
+				WS_TABSTOP | WS_VISIBLE | WS_CHILD | BS_LEFT, 250, 280, 200, 20,
+				hwnd, NULL, (HINSTANCE)GetWindowLong(hwnd, GWL_HINSTANCE), NULL);
+			Edit[1] = CreateWindow("EDIT", "",
+				WS_VISIBLE | WS_CHILD | WS_BORDER | DT_VCENTER, 410, 280, 100, 20,
+				hwnd, NULL, (HINSTANCE)GetWindowLong(hwnd, GWL_HINSTANCE), NULL);
+			Edit[2] = CreateWindow("EDIT", "",
+				WS_VISIBLE | WS_CHILD | WS_BORDER | DT_VCENTER, 410, 310, 100, 20,
+				hwnd, NULL, (HINSTANCE)GetWindowLong(hwnd, GWL_HINSTANCE), NULL);
+			Text[7] = CreateWindow("STATIC", "请选择草坪的档次",
+				WS_TABSTOP | WS_VISIBLE | WS_CHILD | BS_LEFT, 250, 350, 200, 20,
+				hwnd, NULL, (HINSTANCE)GetWindowLong(hwnd, GWL_HINSTANCE), NULL);
+			BUTTON[18] = CreateWindow("BUTTON", "高级草",
+				WS_TABSTOP | WS_VISIBLE | WS_CHILD | BS_DEFPUSHBUTTON, 220, 370, 50, 20,
+				hwnd, NULL, (HINSTANCE)GetWindowLong(hwnd, GWL_HINSTANCE), NULL);
+			BUTTON[19] = CreateWindow("BUTTON", "中级草",
+				WS_TABSTOP | WS_VISIBLE | WS_CHILD | BS_DEFPUSHBUTTON, 270, 370, 50, 20,
+				hwnd, NULL, (HINSTANCE)GetWindowLong(hwnd, GWL_HINSTANCE), NULL);
+			BUTTON[20] = CreateWindow("BUTTON", "初级草",
+				WS_TABSTOP | WS_VISIBLE | WS_CHILD | BS_DEFPUSHBUTTON, 320, 370, 50, 20,
+				hwnd, NULL, (HINSTANCE)GetWindowLong(hwnd, GWL_HINSTANCE), NULL);
+		}
+		if ((HWND)lParam == BUTTON[5])
+		{
+			Text[6] = CreateWindow("STATIC", "请输入三角形的三条边",
+				WS_TABSTOP | WS_VISIBLE | WS_CHILD | BS_LEFT, 250, 280, 200, 20,
+				hwnd, NULL, (HINSTANCE)GetWindowLong(hwnd, GWL_HINSTANCE), NULL);
+			Edit[3] = CreateWindow("EDIT", "",
+				WS_VISIBLE | WS_CHILD | WS_BORDER | DT_VCENTER, 410, 280, 100, 20,
+				hwnd, NULL, (HINSTANCE)GetWindowLong(hwnd, GWL_HINSTANCE), NULL);
+			Edit[4] = CreateWindow("EDIT", "",
+				WS_VISIBLE | WS_CHILD | WS_BORDER | DT_VCENTER, 410, 310, 100, 20,
+				hwnd, NULL, (HINSTANCE)GetWindowLong(hwnd, GWL_HINSTANCE), NULL);
+			Edit[5] = CreateWindow("EDIT", "",
+				WS_VISIBLE | WS_CHILD | WS_BORDER | DT_VCENTER, 410, 340, 100, 20,
+				hwnd, NULL, (HINSTANCE)GetWindowLong(hwnd, GWL_HINSTANCE), NULL);
+			Text[7] = CreateWindow("STATIC", "请选择草坪的档次",
+				WS_TABSTOP | WS_VISIBLE | WS_CHILD | BS_LEFT, 250, 360, 200, 20,
+				hwnd, NULL, (HINSTANCE)GetWindowLong(hwnd, GWL_HINSTANCE), NULL);
+			BUTTON[21] = CreateWindow("BUTTON", "高级草",
+				WS_TABSTOP | WS_VISIBLE | WS_CHILD | BS_DEFPUSHBUTTON, 220, 380, 50, 20,
+				hwnd, NULL, (HINSTANCE)GetWindowLong(hwnd, GWL_HINSTANCE), NULL);
+			BUTTON[22] = CreateWindow("BUTTON", "中级草",
+				WS_TABSTOP | WS_VISIBLE | WS_CHILD | BS_DEFPUSHBUTTON, 270, 380, 50, 20,
+				hwnd, NULL, (HINSTANCE)GetWindowLong(hwnd, GWL_HINSTANCE), NULL);
+			BUTTON[23] = CreateWindow("BUTTON", "初级草",
+				WS_TABSTOP | WS_VISIBLE | WS_CHILD | BS_DEFPUSHBUTTON, 320, 380, 50, 20,
+				hwnd, NULL, (HINSTANCE)GetWindowLong(hwnd, GWL_HINSTANCE), NULL);
+		}
+		if ((HWND)lParam == BUTTON[18])
+		{
+			grass= Grass(0);
+			GetWindowText(Edit[1], recx, 64);
+			GetWindowText(Edit[2], recy, 64);
+			rectangle.length=atof(recx);
+			rectangle.wide=atof(recy);
+			Text[8] = CreateWindow("STATIC", "当前草丛占用土地为",
+				WS_TABSTOP | WS_VISIBLE | WS_CHILD | BS_LEFT, 250, 410, 200, 20,
+				hwnd, NULL, (HINSTANCE)GetWindowLong(hwnd, GWL_HINSTANCE), NULL);
+			int number = (int)rectangle.getarea();
+			itoa(number, rectanglearea, 10);
+			Edit[10] = CreateWindow("EDIT", "",
+				WS_VISIBLE | WS_CHILD | WS_BORDER | DT_VCENTER, 460, 410, 100, 20,
+				hwnd, NULL, (HINSTANCE)GetWindowLong(hwnd, GWL_HINSTANCE), NULL);
+			SetWindowText(Edit[10], rectanglearea);
+			Text[9] = CreateWindow("STATIC", "当前草丛占用金额为",
+				WS_TABSTOP | WS_VISIBLE | WS_CHILD | BS_LEFT, 250, 430, 200, 20,
+				hwnd, NULL, (HINSTANCE)GetWindowLong(hwnd, GWL_HINSTANCE), NULL);
+			number = (int)(rectangle.getarea()*grass.price);
+			itoa(number, grassprice, 10);
+			Edit[11] = CreateWindow("EDIT", "",
+				WS_VISIBLE | WS_CHILD | WS_BORDER | DT_VCENTER, 460, 430, 100, 20,
+				hwnd, NULL, (HINSTANCE)GetWindowLong(hwnd, GWL_HINSTANCE), NULL);
+			SetWindowText(Edit[11], grassprice);
+			cost.currentarea = cost.currentarea+rectangle.getarea();
+			cost.currentprice =cost.currentprice+rectangle.getarea()*grass.price;
+			int price;
+			double count;
+			count = cost.currentprice;
+			price = count;
+			itoa(price, currentp, 10);
+			SetWindowText(Edit[8], currentp);
+			int area;
+			count = cost.currentarea;
+			area = (int)count;
+			itoa(area, currenta, 10);
+			SetWindowText(Edit[9], currenta);
+		}
+		if ((HWND)lParam == BUTTON[19])
+		{
+			grass = Grass(1);
+			GetWindowText(Edit[1], recx, 64); //获取Edit[1]给recx//
+			GetWindowText(Edit[2], recy, 64);
+			rectangle.length = atof(recx);// 将recx转换成double//
+			rectangle.wide = atof(recy);
+			Text[8] = CreateWindow("STATIC", "当前草丛占用土地为",
+				WS_TABSTOP | WS_VISIBLE | WS_CHILD | BS_LEFT, 250, 410, 200, 20,
+				hwnd, NULL, (HINSTANCE)GetWindowLong(hwnd, GWL_HINSTANCE), NULL);
+			int number = (int)rectangle.getarea();
+			itoa(number, rectanglearea, 10);
+			Edit[10] = CreateWindow("EDIT", "",
+				WS_VISIBLE | WS_CHILD | WS_BORDER | DT_VCENTER, 460, 410, 100, 20,
+				hwnd, NULL, (HINSTANCE)GetWindowLong(hwnd, GWL_HINSTANCE), NULL);
+			SetWindowText(Edit[10], rectanglearea);
+			Text[9] = CreateWindow("STATIC", "当前草丛占用金额为",
+				WS_TABSTOP | WS_VISIBLE | WS_CHILD | BS_LEFT, 250, 430, 200, 20,
+				hwnd, NULL, (HINSTANCE)GetWindowLong(hwnd, GWL_HINSTANCE), NULL);
+			number = (int)(rectangle.getarea()*grass.price);
+			itoa(number, grassprice, 10);
+			Edit[11] = CreateWindow("EDIT", "",
+				WS_VISIBLE | WS_CHILD | WS_BORDER | DT_VCENTER, 460, 430, 100, 20,
+				hwnd, NULL, (HINSTANCE)GetWindowLong(hwnd, GWL_HINSTANCE), NULL);
+			SetWindowText(Edit[11], grassprice);
+			cost.currentarea = cost.currentarea + rectangle.getarea();
+			cost.currentprice = cost.currentprice + rectangle.getarea()*grass.price;
+			int price;
+			double count;
+			count = cost.currentprice;
+			price = count;
+			itoa(price, currentp, 10);
+			SetWindowText(Edit[8], currentp);
+			int area;
+			count = cost.currentarea;
+			area = (int)count;
+			itoa(area, currenta, 10);
+			SetWindowText(Edit[9], currenta);
+		}
+		if ((HWND)lParam == BUTTON[20])
+		{
+			grass = Grass(2);
+			GetWindowText(Edit[1], recx, 64);
+			GetWindowText(Edit[2], recy, 64);
+			rectangle.length = atof(recx);
+			rectangle.wide = atof(recy);
+			Text[8] = CreateWindow("STATIC", "当前草丛占用土地为",
+				WS_TABSTOP | WS_VISIBLE | WS_CHILD | BS_LEFT, 250, 410, 200, 20,
+				hwnd, NULL, (HINSTANCE)GetWindowLong(hwnd, GWL_HINSTANCE), NULL);
+			int number = (int)rectangle.getarea();
+			itoa(number, rectanglearea, 10);
+			Edit[10] = CreateWindow("EDIT", "",
+				WS_VISIBLE | WS_CHILD | WS_BORDER | DT_VCENTER, 460, 410, 100, 20,
+				hwnd, NULL, (HINSTANCE)GetWindowLong(hwnd, GWL_HINSTANCE), NULL);
+			SetWindowText(Edit[10], rectanglearea);
+			Text[9] = CreateWindow("STATIC", "当前草丛占用金额为",
+				WS_TABSTOP | WS_VISIBLE | WS_CHILD | BS_LEFT, 250, 430, 200, 20,
+				hwnd, NULL, (HINSTANCE)GetWindowLong(hwnd, GWL_HINSTANCE), NULL);
+			number = (int)(rectangle.getarea()*grass.price);
+			itoa(number, grassprice, 10);
+			Edit[11] = CreateWindow("EDIT", "",
+				WS_VISIBLE | WS_CHILD | WS_BORDER | DT_VCENTER, 460, 430, 100, 20,
+				hwnd, NULL, (HINSTANCE)GetWindowLong(hwnd, GWL_HINSTANCE), NULL);
+			SetWindowText(Edit[11], grassprice);
+			cost.currentarea = cost.currentarea + rectangle.getarea();
+			cost.currentprice = cost.currentprice + rectangle.getarea()*grass.price;
+			int price;
+			double count;
+			count = cost.currentprice;
+			price = count;
+			itoa(price, currentp, 10);
+			SetWindowText(Edit[8], currentp);
+			int area;
+			count = cost.currentarea;
+			area = (int)count;
+			itoa(area, currenta, 10);
+			SetWindowText(Edit[9], currenta);
+		}
+		if ((HWND)lParam == BUTTON[21])
+		{
+			grass = Grass(0);
+			GetWindowText(Edit[3], tria, 64);
+			GetWindowText(Edit[4], trib, 64);
+			GetWindowText(Edit[5],tric,64);
+			triangle.a=atof(tria);
+			triangle.b=atof(trib);
+			triangle.c=atof(tric);
+			Text[8] = CreateWindow("STATIC", "当前草丛占用土地为",
+				WS_TABSTOP | WS_VISIBLE | WS_CHILD | BS_LEFT, 250, 410, 200, 20,
+				hwnd, NULL, (HINSTANCE)GetWindowLong(hwnd, GWL_HINSTANCE), NULL);
+			int number = (int)triangle.getarea();
+			itoa(number, trianglearea, 10);
+			Edit[10] = CreateWindow("EDIT", "",
+				WS_VISIBLE | WS_CHILD | WS_BORDER | DT_VCENTER, 460, 410, 100, 20,
+				hwnd, NULL, (HINSTANCE)GetWindowLong(hwnd, GWL_HINSTANCE), NULL);
+			SetWindowText(Edit[10],trianglearea);
+			Text[9] = CreateWindow("STATIC", "当前草丛占用金额为",
+				WS_TABSTOP | WS_VISIBLE | WS_CHILD | BS_LEFT, 250, 430, 200, 20,
+				hwnd, NULL, (HINSTANCE)GetWindowLong(hwnd, GWL_HINSTANCE), NULL);
+			number = (int)(triangle.getarea()*grass.price);
+			itoa(number, grassprice, 10);
+			Edit[11] = CreateWindow("EDIT", "",
+				WS_VISIBLE | WS_CHILD | WS_BORDER | DT_VCENTER, 460, 430, 100, 20,
+				hwnd, NULL, (HINSTANCE)GetWindowLong(hwnd, GWL_HINSTANCE), NULL);
+			SetWindowText(Edit[11], grassprice);
+			cost.currentarea = cost.currentarea + triangle.getarea();
+			cost.currentprice = cost.currentprice + triangle.getarea()*grass.price;
+			int price;
+			double count;
+			count = cost.currentprice;
+			price = count;
+			itoa(price, currentp, 10);
+			SetWindowText(Edit[8], currentp);
+			int area;
+			count = cost.currentarea;
+			area = (int)count;
+			itoa(area, currenta, 10);
+			SetWindowText(Edit[9], currenta);
+		}
+		if ((HWND)lParam == BUTTON[22])
+		{
+			grass = Grass(1);
+			GetWindowText(Edit[3], tria, 64);
+			GetWindowText(Edit[4], trib, 64);
+			GetWindowText(Edit[5], tric, 64);
+			triangle.a = atof(tria);
+			triangle.b = atof(trib);
+			triangle.c = atof(tric);
+			Text[8] = CreateWindow("STATIC", "当前草丛占用土地为",
+				WS_TABSTOP | WS_VISIBLE | WS_CHILD | BS_LEFT, 250, 410, 200, 20,
+				hwnd, NULL, (HINSTANCE)GetWindowLong(hwnd, GWL_HINSTANCE), NULL);
+			int number = (int)triangle.getarea();
+			itoa(number, trianglearea, 10);
+			Edit[10] = CreateWindow("EDIT", "",
+				WS_VISIBLE | WS_CHILD | WS_BORDER | DT_VCENTER, 460, 410, 100, 20,
+				hwnd, NULL, (HINSTANCE)GetWindowLong(hwnd, GWL_HINSTANCE), NULL);
+			SetWindowText(Edit[10], trianglearea);
+			Text[9] = CreateWindow("STATIC", "当前草丛占用金额为",
+				WS_TABSTOP | WS_VISIBLE | WS_CHILD | BS_LEFT, 250, 430, 200, 20,
+				hwnd, NULL, (HINSTANCE)GetWindowLong(hwnd, GWL_HINSTANCE), NULL);
+			number = (int)(triangle.getarea()*grass.price);
+			itoa(number, grassprice, 10);
+			Edit[11] = CreateWindow("EDIT", "",
+				WS_VISIBLE | WS_CHILD | WS_BORDER | DT_VCENTER, 460, 430, 100, 20,
+				hwnd, NULL, (HINSTANCE)GetWindowLong(hwnd, GWL_HINSTANCE), NULL);
+			SetWindowText(Edit[11], grassprice);
+			cost.currentarea = cost.currentarea + triangle.getarea();
+			cost.currentprice = cost.currentprice + triangle.getarea()*grass.price;
+			int price;
+			double count;
+			count = cost.currentprice;
+			price = count;
+			itoa(price, currentp, 10);
+			SetWindowText(Edit[8], currentp);
+			int area;
+			count = cost.currentarea;
+			area = (int)count;
+			itoa(area, currenta, 10);
+			SetWindowText(Edit[9], currenta);
+		}
+		if ((HWND)lParam == BUTTON[23])
+		{
+			grass = Grass(2);
+			GetWindowText(Edit[3], tria, 64);
+			GetWindowText(Edit[4], trib, 64);
+			GetWindowText(Edit[5], tric, 64);
+			triangle.a = atof(tria);
+			triangle.b = atof(trib);
+			triangle.c = atof(tric);
+			Text[8] = CreateWindow("STATIC", "当前草丛占用土地为",
+				WS_TABSTOP | WS_VISIBLE | WS_CHILD | BS_LEFT, 250, 410, 200, 20,
+				hwnd, NULL, (HINSTANCE)GetWindowLong(hwnd, GWL_HINSTANCE), NULL);
+			int number = (int)triangle.getarea();
+			itoa(number, trianglearea, 10);
+			Edit[10] = CreateWindow("EDIT", "",
+				WS_VISIBLE | WS_CHILD | WS_BORDER | DT_VCENTER, 460, 410, 100, 20,
+				hwnd, NULL, (HINSTANCE)GetWindowLong(hwnd, GWL_HINSTANCE), NULL);
+			SetWindowText(Edit[10], trianglearea);
+			Text[9] = CreateWindow("STATIC", "当前草丛占用金额为",
+				WS_TABSTOP | WS_VISIBLE | WS_CHILD | BS_LEFT, 250, 430, 200, 20,
+				hwnd, NULL, (HINSTANCE)GetWindowLong(hwnd, GWL_HINSTANCE), NULL);
+			number = (int)(triangle.getarea()*grass.price);
+			itoa(number, grassprice, 10);
+			Edit[11] = CreateWindow("EDIT", "",
+				WS_VISIBLE | WS_CHILD | WS_BORDER | DT_VCENTER, 460, 430, 100, 20,
+				hwnd, NULL, (HINSTANCE)GetWindowLong(hwnd, GWL_HINSTANCE), NULL);
+			SetWindowText(Edit[11], grassprice);
+			cost.currentarea = cost.currentarea + triangle.getarea();
+			cost.currentprice = cost.currentprice + triangle.getarea()*grass.price;
+			int price;
+			double count;
+			count = cost.currentprice;
+			price = count;
+			itoa(price, currentp, 10);
+			SetWindowText(Edit[8], currentp);
+			int area;
+			count = cost.currentarea;
+			area = (int)count;
+			itoa(area, currenta, 10);
+			SetWindowText(Edit[9], currenta);
+		}
+		if ((HWND)lParam == BUTTON[6])
+		{
+			grass=Grass(0);
+			GetWindowText(Edit[0], circleradio, 64);
+			circle.r = atof(circleradio);
+			Text[8] = CreateWindow("STATIC", "当前草丛占用土地为",
+				WS_TABSTOP | WS_VISIBLE | WS_CHILD | BS_LEFT, 250, 410, 200, 20,
+				hwnd, NULL, (HINSTANCE)GetWindowLong(hwnd, GWL_HINSTANCE), NULL);
+			int number =(int)circle.getarea();
+			itoa(number,grassarea, 10);
+			Edit[10] = CreateWindow("EDIT", "",
+				WS_VISIBLE | WS_CHILD | WS_BORDER | DT_VCENTER, 460, 410, 100, 20,
+				hwnd, NULL, (HINSTANCE)GetWindowLong(hwnd, GWL_HINSTANCE), NULL);
+			SetWindowText(Edit[10], grassarea);
+			Text[9] = CreateWindow("STATIC", "当前草丛占用金额为",
+				WS_TABSTOP | WS_VISIBLE | WS_CHILD | BS_LEFT, 250, 430, 200, 20,
+				hwnd, NULL, (HINSTANCE)GetWindowLong(hwnd, GWL_HINSTANCE), NULL);
+			number=(int)(circle.getarea()*grass.price);
+			itoa(number, grassprice, 10);
+			Edit[11] = CreateWindow("EDIT", "",
+				WS_VISIBLE | WS_CHILD | WS_BORDER | DT_VCENTER, 460, 430, 100, 20,
+				hwnd, NULL, (HINSTANCE)GetWindowLong(hwnd, GWL_HINSTANCE), NULL);
+			SetWindowText(Edit[11],grassprice);
+			cost.currentarea=cost.currentarea+circle.getarea();
+			cost.currentprice= cost.currentprice+circle.getarea()*grass.price;
+			int price;
+			double count;
+			count=cost.currentprice;
+			price=count;
+			itoa(price,currentp, 10);
+			SetWindowText(Edit[8],currentp);
+			int area;
+			count=cost.currentarea;
+		   area=(int)count;
+			itoa(area,currenta, 10);
+			SetWindowText(Edit[9],currenta);	
+		}
+		if ((HWND)lParam == BUTTON[7])
+		{
+			grass = Grass(1);
+			GetWindowText(Edit[0], circleradio, 64);
+			circle.r = atof(circleradio);
+			Text[8] = CreateWindow("STATIC", "当前草丛占用土地为",
+				WS_TABSTOP | WS_VISIBLE | WS_CHILD | BS_LEFT, 250, 410, 200, 20,
+				hwnd, NULL, (HINSTANCE)GetWindowLong(hwnd, GWL_HINSTANCE), NULL);
+			int number = (int)circle.getarea();
+			itoa(number, grassarea, 10);
+			Edit[10] = CreateWindow("EDIT", "",
+				WS_VISIBLE | WS_CHILD | WS_BORDER | DT_VCENTER, 460, 410, 100, 20,
+				hwnd, NULL, (HINSTANCE)GetWindowLong(hwnd, GWL_HINSTANCE), NULL);
+			SetWindowText(Edit[10], grassarea);
+			Text[9] = CreateWindow("STATIC", "当前草丛占用金额为",
+				WS_TABSTOP | WS_VISIBLE | WS_CHILD | BS_LEFT, 250, 430, 200, 20,
+				hwnd, NULL, (HINSTANCE)GetWindowLong(hwnd, GWL_HINSTANCE), NULL);
+			number = (int)(circle.getarea()*grass.price);
+			itoa(number, grassprice, 10);
+			Edit[11] = CreateWindow("EDIT", "",
+				WS_VISIBLE | WS_CHILD | WS_BORDER | DT_VCENTER, 460, 430, 100, 20,
+				hwnd, NULL, (HINSTANCE)GetWindowLong(hwnd, GWL_HINSTANCE), NULL);
+			SetWindowText(Edit[11], grassprice);
+			cost.currentarea = cost.currentarea+circle.getarea();
+			cost.currentprice =cost.currentprice+ circle.getarea()*grass.price;
+			int price;
+			double count;
+			count = cost.currentprice;
+			price = count;
+			itoa(price, currentp, 10);
+			SetWindowText(Edit[8], currentp);
+			int area;
+			count = cost.currentarea;
+			area = (int)count;
+			itoa(area, currenta, 10);
+			SetWindowText(Edit[9], currenta);
+		}
+		if ((HWND)lParam == BUTTON[8])
+		{
+			grass = Grass(2);
+			GetWindowText(Edit[0], circleradio, 64);
+			circle.r = atof(circleradio);
+			Text[8] = CreateWindow("STATIC", "当前草丛占用土地为",
+				WS_TABSTOP | WS_VISIBLE | WS_CHILD | BS_LEFT, 250, 410, 200, 20,
+				hwnd, NULL, (HINSTANCE)GetWindowLong(hwnd, GWL_HINSTANCE), NULL);
+			int number = (int)circle.getarea();
+			itoa(number, grassarea, 10);
+			Edit[10] = CreateWindow("EDIT", "",
+				WS_VISIBLE | WS_CHILD | WS_BORDER | DT_VCENTER, 460, 410, 100, 20,
+				hwnd, NULL, (HINSTANCE)GetWindowLong(hwnd, GWL_HINSTANCE), NULL);
+			SetWindowText(Edit[10], grassarea);
+			Text[9] = CreateWindow("STATIC", "当前草丛占用金额为",
+				WS_TABSTOP | WS_VISIBLE | WS_CHILD | BS_LEFT, 250, 430, 200, 20,
+				hwnd, NULL, (HINSTANCE)GetWindowLong(hwnd, GWL_HINSTANCE), NULL);
+			number = (int)(circle.getarea()*grass.price);
+			itoa(number, grassprice, 10);
+			Edit[11] = CreateWindow("EDIT", "",
+				WS_VISIBLE | WS_CHILD | WS_BORDER | DT_VCENTER, 460, 430, 100, 20,
+				hwnd, NULL, (HINSTANCE)GetWindowLong(hwnd, GWL_HINSTANCE), NULL);
+			SetWindowText(Edit[11], grassprice);
+			cost.currentarea = cost.currentarea+circle.getarea();
+			cost.currentprice =cost.currentprice+circle.getarea()*grass.price;
+			int price;
+			double count;
+			count = cost.currentprice;
+			price = count;
+			itoa(price, currentp, 10);
+			SetWindowText(Edit[8], currentp);
+			int area;
+			count = cost.currentarea;
+			area = (int)count;
+			itoa(area, currenta, 10);
+			SetWindowText(Edit[9], currenta);
+		}
+		if ((HWND)lParam == BUTTON[9])
+		{
+			Text[5] = CreateWindow("STATIC", "选择游泳池的形状",
+				WS_TABSTOP | WS_VISIBLE | WS_CHILD | BS_LEFT, 810, 180, 200, 20,
+				hwnd, NULL, (HINSTANCE)GetWindowLong(hwnd, GWL_HINSTANCE), NULL);
+			BUTTON[10] = CreateWindow("BUTTON", "圆形",
+				WS_TABSTOP | WS_VISIBLE | WS_CHILD | BS_DEFPUSHBUTTON, 760, 220, 30, 20,
+				hwnd, NULL, (HINSTANCE)GetWindowLong(hwnd, GWL_HINSTANCE), NULL);
+			BUTTON[11] = CreateWindow("BUTTON", "矩形",
+				WS_TABSTOP | WS_VISIBLE | WS_CHILD | BS_DEFPUSHBUTTON, 810, 220, 30, 20,
+				hwnd, NULL, (HINSTANCE)GetWindowLong(hwnd, GWL_HINSTANCE), NULL);
+			BUTTON[12] = CreateWindow("BUTTON", "三角形",
+				WS_TABSTOP | WS_VISIBLE | WS_CHILD | BS_DEFPUSHBUTTON, 860, 220, 50, 20,
+				hwnd, NULL, (HINSTANCE)GetWindowLong(hwnd, GWL_HINSTANCE), NULL);
+		}
+		if ((HWND)lParam == BUTTON[10])
+		{
+			Text[6] = CreateWindow("STATIC", "请输入圆形的半径",
+				WS_TABSTOP | WS_VISIBLE | WS_CHILD | BS_LEFT, 810, 280, 200, 20,
+				hwnd, NULL, (HINSTANCE)GetWindowLong(hwnd, GWL_HINSTANCE), NULL);
+			Edit[12] = CreateWindow("EDIT", "",
+				WS_VISIBLE | WS_CHILD | WS_BORDER | DT_VCENTER, 1020, 280, 100, 20,
+				hwnd, NULL, (HINSTANCE)GetWindowLong(hwnd, GWL_HINSTANCE), NULL);
+			Text[7] = CreateWindow("STATIC", "请选择泳池的档次",
+				WS_TABSTOP | WS_VISIBLE | WS_CHILD | BS_LEFT, 810, 320, 200, 20,
+				hwnd, NULL, (HINSTANCE)GetWindowLong(hwnd, GWL_HINSTANCE), NULL);
+			BUTTON[13] = CreateWindow("BUTTON", "高级泳池",
+				WS_TABSTOP | WS_VISIBLE | WS_CHILD | BS_DEFPUSHBUTTON, 740, 350, 70, 20,
+				hwnd, NULL, (HINSTANCE)GetWindowLong(hwnd, GWL_HINSTANCE), NULL);
+			BUTTON[14] = CreateWindow("BUTTON", "中级泳池",
+				WS_TABSTOP | WS_VISIBLE | WS_CHILD | BS_DEFPUSHBUTTON, 810, 350, 70, 20,
+				hwnd, NULL, (HINSTANCE)GetWindowLong(hwnd, GWL_HINSTANCE), NULL);
+			BUTTON[15] = CreateWindow("BUTTON", "初级泳池",
+				WS_TABSTOP | WS_VISIBLE | WS_CHILD | BS_DEFPUSHBUTTON, 880, 350, 70, 20,
+				hwnd, NULL, (HINSTANCE)GetWindowLong(hwnd, GWL_HINSTANCE), NULL);
+		}
+		if ((HWND)lParam == BUTTON[11])
+		{
+			Text[6] = CreateWindow("STATIC", "请输入矩形的长和宽",
+				WS_TABSTOP | WS_VISIBLE | WS_CHILD | BS_LEFT, 810, 280, 200, 20,
+				hwnd, NULL, (HINSTANCE)GetWindowLong(hwnd, GWL_HINSTANCE), NULL);
+			Edit[13] = CreateWindow("EDIT", "",
+				WS_VISIBLE | WS_CHILD | WS_BORDER | DT_VCENTER, 1020, 280, 100, 20,
+				hwnd, NULL, (HINSTANCE)GetWindowLong(hwnd, GWL_HINSTANCE), NULL);
+			Edit[14] = CreateWindow("EDIT", "",
+				WS_VISIBLE | WS_CHILD | WS_BORDER | DT_VCENTER, 1020, 310, 100, 20,
+				hwnd, NULL, (HINSTANCE)GetWindowLong(hwnd, GWL_HINSTANCE), NULL);
+			Text[7] = CreateWindow("STATIC", "请选择游泳池的档次",
+				WS_TABSTOP | WS_VISIBLE | WS_CHILD | BS_LEFT, 810, 350, 200, 20,
+				hwnd, NULL, (HINSTANCE)GetWindowLong(hwnd, GWL_HINSTANCE), NULL);
+			BUTTON[24] = CreateWindow("BUTTON", "高级泳池",
+				WS_TABSTOP | WS_VISIBLE | WS_CHILD | BS_DEFPUSHBUTTON, 740, 370, 70, 20,
+				hwnd, NULL, (HINSTANCE)GetWindowLong(hwnd, GWL_HINSTANCE), NULL);
+			BUTTON[25] = CreateWindow("BUTTON", "中级泳池",
+				WS_TABSTOP | WS_VISIBLE | WS_CHILD | BS_DEFPUSHBUTTON, 810, 370, 70, 20,
+				hwnd, NULL, (HINSTANCE)GetWindowLong(hwnd, GWL_HINSTANCE), NULL);
+			BUTTON[26] = CreateWindow("BUTTON", "初级泳池",
+				WS_TABSTOP | WS_VISIBLE | WS_CHILD | BS_DEFPUSHBUTTON, 880, 370, 70, 20,
+				hwnd, NULL, (HINSTANCE)GetWindowLong(hwnd, GWL_HINSTANCE), NULL);
+		}
+		if ((HWND)lParam == BUTTON[12])
+		{
+			Text[6] = CreateWindow("STATIC", "请输入三角形的三条边",
+				WS_TABSTOP | WS_VISIBLE | WS_CHILD | BS_LEFT, 810, 280, 200, 20,
+				hwnd, NULL, (HINSTANCE)GetWindowLong(hwnd, GWL_HINSTANCE), NULL);
+			Edit[15] = CreateWindow("EDIT", "",
+				WS_VISIBLE | WS_CHILD | WS_BORDER | DT_VCENTER, 1020, 280, 100, 20,
+				hwnd, NULL, (HINSTANCE)GetWindowLong(hwnd, GWL_HINSTANCE), NULL);
+			Edit[16] = CreateWindow("EDIT", "",
+				WS_VISIBLE | WS_CHILD | WS_BORDER | DT_VCENTER, 1020, 310, 100, 20,
+				hwnd, NULL, (HINSTANCE)GetWindowLong(hwnd, GWL_HINSTANCE), NULL);
+			Edit[17] = CreateWindow("EDIT", "",
+				WS_VISIBLE | WS_CHILD | WS_BORDER | DT_VCENTER, 1020, 340, 100, 20,
+				hwnd, NULL, (HINSTANCE)GetWindowLong(hwnd, GWL_HINSTANCE), NULL);
+			Text[7] = CreateWindow("STATIC", "请选择泳池的档次",
+				WS_TABSTOP | WS_VISIBLE | WS_CHILD | BS_LEFT, 810, 360, 200, 20,
+				hwnd, NULL, (HINSTANCE)GetWindowLong(hwnd, GWL_HINSTANCE), NULL);
+			BUTTON[27] = CreateWindow("BUTTON", "高级泳池",
+				WS_TABSTOP | WS_VISIBLE | WS_CHILD | BS_DEFPUSHBUTTON, 740, 380, 70, 20,
+				hwnd, NULL, (HINSTANCE)GetWindowLong(hwnd, GWL_HINSTANCE), NULL);
+			BUTTON[28] = CreateWindow("BUTTON", "中级泳池",
+				WS_TABSTOP | WS_VISIBLE | WS_CHILD | BS_DEFPUSHBUTTON, 810, 380, 70, 20,
+				hwnd, NULL, (HINSTANCE)GetWindowLong(hwnd, GWL_HINSTANCE), NULL);
+			BUTTON[29] = CreateWindow("BUTTON", "初级泳池",
+				WS_TABSTOP | WS_VISIBLE | WS_CHILD | BS_DEFPUSHBUTTON, 880, 380, 70, 20,
+				hwnd, NULL, (HINSTANCE)GetWindowLong(hwnd, GWL_HINSTANCE), NULL);
+		}
+		if ((HWND)lParam == BUTTON[13])
+		{
+		pool=Pool(0);
+		GetWindowText(Edit[12], circleradio, 64);
+		circlep.r = atof(circleradio);
+			Text[8] = CreateWindow("STATIC", "当前泳池占用土地为",
+				WS_TABSTOP | WS_VISIBLE | WS_CHILD | BS_LEFT, 810, 410, 200, 20,
+				hwnd, NULL, (HINSTANCE)GetWindowLong(hwnd, GWL_HINSTANCE), NULL);
+			int number = (int)circlep.getarea();
+			itoa(number, grassarea, 10);
+			Edit[18] = CreateWindow("EDIT", "",
+				WS_VISIBLE | WS_CHILD | WS_BORDER | DT_VCENTER, 1020, 410, 100, 20,
+				hwnd, NULL, (HINSTANCE)GetWindowLong(hwnd, GWL_HINSTANCE), NULL);
+			SetWindowText(Edit[18], grassarea);
+			Text[9] = CreateWindow("STATIC", "当前泳池占用金额为",
+				WS_TABSTOP | WS_VISIBLE | WS_CHILD | BS_LEFT, 810, 430, 200, 20,
+				hwnd, NULL, (HINSTANCE)GetWindowLong(hwnd, GWL_HINSTANCE), NULL);
+			number = (int)(circlep.getarea()*pool.price);
+			itoa(number, grassprice, 10);
+			Edit[19] = CreateWindow("EDIT", "",
+				WS_VISIBLE | WS_CHILD | WS_BORDER | DT_VCENTER, 1020, 430, 100, 20,
+				hwnd, NULL, (HINSTANCE)GetWindowLong(hwnd, GWL_HINSTANCE), NULL);
+			SetWindowText(Edit[19], grassprice);
+			cost.currentprice=cost.currentprice+circlep.getarea()*pool.price;
+			cost.currentarea=cost.currentarea+circlep.getarea();
+			int price;
+			double count;
+			count = cost.currentprice;
+			price = count;
+			itoa(price, currentp, 10);
+			SetWindowText(Edit[8], currentp);
+			int area;
+			count = cost.currentarea;
+			area = (int)count;
+			itoa(area, currenta, 10);
+			SetWindowText(Edit[9], currenta);
+		}
+		if ((HWND)lParam == BUTTON[14])
+		{
+			pool = Pool(1);
+			GetWindowText(Edit[12], circleradio, 64);
+			circlep.r = atof(circleradio);
+			Text[8] = CreateWindow("STATIC", "当前泳池占用土地为",
+				WS_TABSTOP | WS_VISIBLE | WS_CHILD | BS_LEFT, 810, 410, 200, 20,
+				hwnd, NULL, (HINSTANCE)GetWindowLong(hwnd, GWL_HINSTANCE), NULL);
+			int number = (int)circlep.getarea();
+			itoa(number, grassarea, 10);
+			Edit[18] = CreateWindow("EDIT", "",
+				WS_VISIBLE | WS_CHILD | WS_BORDER | DT_VCENTER, 1020, 410, 100, 20,
+				hwnd, NULL, (HINSTANCE)GetWindowLong(hwnd, GWL_HINSTANCE), NULL);
+			Text[9] = CreateWindow("STATIC", "当前泳池占用金额为",
+				WS_TABSTOP | WS_VISIBLE | WS_CHILD | BS_LEFT, 810, 430, 200, 20,
+				hwnd, NULL, (HINSTANCE)GetWindowLong(hwnd, GWL_HINSTANCE), NULL);
+			Edit[19] = CreateWindow("EDIT", "",
+				WS_VISIBLE | WS_CHILD | WS_BORDER | DT_VCENTER, 1020, 430, 100, 20,
+				hwnd, NULL, (HINSTANCE)GetWindowLong(hwnd, GWL_HINSTANCE), NULL);
+			SetWindowText(Edit[19], grassprice);
+			cost.currentprice = cost.currentprice + circlep.getarea()*pool.price;
+			cost.currentarea = cost.currentarea + circlep.getarea();
+			int price;
+			double count;
+			count = cost.currentprice;
+			price = count;
+			itoa(price, currentp, 10);
+			SetWindowText(Edit[8], currentp);
+			int area;
+			count = cost.currentarea;
+			area = (int)count;
+			itoa(area, currenta, 10);
+			SetWindowText(Edit[9], currenta);
+		}
+		if ((HWND)lParam == BUTTON[15])
+		{
+			pool = Pool(2);
+			GetWindowText(Edit[12], circleradio, 64);
+			circlep.r = atof(circleradio);
+			Text[8] = CreateWindow("STATIC", "当前泳池占用土地为",
+				WS_TABSTOP | WS_VISIBLE | WS_CHILD | BS_LEFT, 810, 410, 200, 20,
+				hwnd, NULL, (HINSTANCE)GetWindowLong(hwnd, GWL_HINSTANCE), NULL);
+			int number = (int)circlep.getarea();
+			itoa(number, grassarea, 10);
+			Edit[18] = CreateWindow("EDIT", "",
+				WS_VISIBLE | WS_CHILD | WS_BORDER | DT_VCENTER, 1020, 410, 100, 20,
+				hwnd, NULL, (HINSTANCE)GetWindowLong(hwnd, GWL_HINSTANCE), NULL);
+			Text[9] = CreateWindow("STATIC", "当前泳池占用金额为",
+				WS_TABSTOP | WS_VISIBLE | WS_CHILD | BS_LEFT, 810, 430, 200, 20,
+				hwnd, NULL, (HINSTANCE)GetWindowLong(hwnd, GWL_HINSTANCE), NULL);
+			Edit[19] = CreateWindow("EDIT", "",
+				WS_VISIBLE | WS_CHILD | WS_BORDER | DT_VCENTER, 1020, 430, 100, 20,
+				hwnd, NULL, (HINSTANCE)GetWindowLong(hwnd, GWL_HINSTANCE), NULL);
+			SetWindowText(Edit[19], grassprice);
+			cost.currentprice = cost.currentprice + circlep.getarea()*pool.price;
+			cost.currentarea = cost.currentarea + circlep.getarea();
+			int price;
+			double count;
+			count = cost.currentprice;
+			price = count;
+			itoa(price, currentp, 10);
+			SetWindowText(Edit[8], currentp);
+			int area;
+			count = cost.currentarea;
+			area = (int)count;
+			itoa(area, currenta, 10);
+			SetWindowText(Edit[9], currenta);
+		}
+		if((HWND)lParam == BUTTON[24])
+		{
+			pool = Pool(0);
+			GetWindowText(Edit[13], recy, 64);
+			GetWindowText(Edit[14], recx, 64);
+			rectanglep.length = atof(recy);
+			rectanglep.wide = atof(recx);
+			Text[8] = CreateWindow("STATIC", "当前泳池占用土地为",
+				WS_TABSTOP | WS_VISIBLE | WS_CHILD | BS_LEFT, 810, 410, 200, 20,
+				hwnd, NULL, (HINSTANCE)GetWindowLong(hwnd, GWL_HINSTANCE), NULL);
+			int number = (int)rectanglep.getarea();
+			itoa(number, poolarea, 10);
+			Edit[18] = CreateWindow("EDIT", "",
+				WS_VISIBLE | WS_CHILD | WS_BORDER | DT_VCENTER, 1020, 410, 100, 20,
+				hwnd, NULL, (HINSTANCE)GetWindowLong(hwnd, GWL_HINSTANCE), NULL);
+			SetWindowText(Edit[18], poolarea);
+			Text[9] = CreateWindow("STATIC", "当前泳池占用金额为",
+				WS_TABSTOP | WS_VISIBLE | WS_CHILD | BS_LEFT, 810, 430, 200, 20,
+				hwnd, NULL, (HINSTANCE)GetWindowLong(hwnd, GWL_HINSTANCE), NULL);
+			Edit[19] = CreateWindow("EDIT", "",
+				WS_VISIBLE | WS_CHILD | WS_BORDER | DT_VCENTER, 1020, 430, 100, 20,
+				hwnd, NULL, (HINSTANCE)GetWindowLong(hwnd, GWL_HINSTANCE), NULL);
+			number = (int)rectanglep.getarea()*pool.price;
+			itoa(number, poolprice, 10);
+			SetWindowText(Edit[19], poolprice);
+			cost.currentprice = cost.currentprice + rectanglep.getarea()*pool.price;
+			cost.currentarea = cost.currentarea + rectanglep.getarea();
+			int price;
+			double count;
+			count = cost.currentprice;
+			price = count;
+			itoa(price, currentp, 10);
+			SetWindowText(Edit[8], currentp);
+			int area;
+			count = cost.currentarea;
+			area = (int)count;
+			itoa(area, currenta, 10);
+			SetWindowText(Edit[9], currenta);
+		}
+		if ((HWND)lParam == BUTTON[25])
+		{
+			pool = Pool(1);
+			GetWindowText(Edit[13], recy, 64);
+			GetWindowText(Edit[14], recx, 64);
+			rectanglep.length = atof(recy);
+			rectanglep.wide = atof(recx);
+			Text[8] = CreateWindow("STATIC", "当前泳池占用土地为",
+				WS_TABSTOP | WS_VISIBLE | WS_CHILD | BS_LEFT, 810, 410, 200, 20,
+				hwnd, NULL, (HINSTANCE)GetWindowLong(hwnd, GWL_HINSTANCE), NULL);
+			int number = (int)rectanglep.getarea();
+			itoa(number, poolarea, 10);
+			Edit[18] = CreateWindow("EDIT", "",
+				WS_VISIBLE | WS_CHILD | WS_BORDER | DT_VCENTER, 1020, 410, 100, 20,
+				hwnd, NULL, (HINSTANCE)GetWindowLong(hwnd, GWL_HINSTANCE), NULL);
+			SetWindowText(Edit[18], poolarea);
+			Text[9] = CreateWindow("STATIC", "当前泳池占用金额为",
+				WS_TABSTOP | WS_VISIBLE | WS_CHILD | BS_LEFT, 810, 430, 200, 20,
+				hwnd, NULL, (HINSTANCE)GetWindowLong(hwnd, GWL_HINSTANCE), NULL);
+			Edit[19] = CreateWindow("EDIT", "",
+				WS_VISIBLE | WS_CHILD | WS_BORDER | DT_VCENTER, 1020, 430, 100, 20,
+				hwnd, NULL, (HINSTANCE)GetWindowLong(hwnd, GWL_HINSTANCE), NULL);
+			number = (int)rectanglep.getarea()*pool.price;
+			itoa(number, poolprice, 10);
+			SetWindowText(Edit[19], poolprice);
+			cost.currentprice = cost.currentprice + rectanglep.getarea()*pool.price;
+			cost.currentarea = cost.currentarea + rectanglep.getarea();
+			int price;
+			double count;
+			count = cost.currentprice;
+			price = count;
+			itoa(price, currentp, 10);
+			SetWindowText(Edit[8], currentp);
+			int area;
+			count = cost.currentarea;
+			area = (int)count;
+			itoa(area, currenta, 10);
+			SetWindowText(Edit[9], currenta);
+		}
+		if ((HWND)lParam == BUTTON[26])
+		{
+			pool = Pool(2);
+			GetWindowText(Edit[13], recy, 64);
+			GetWindowText(Edit[14], recx, 64);
+			rectanglep.length = atof(recy);
+			rectanglep.wide = atof(recx);
+			Text[8] = CreateWindow("STATIC", "当前泳池占用土地为",
+				WS_TABSTOP | WS_VISIBLE | WS_CHILD | BS_LEFT, 810, 410, 200, 20,
+				hwnd, NULL, (HINSTANCE)GetWindowLong(hwnd, GWL_HINSTANCE), NULL);
+			int number = (int)rectanglep.getarea();
+			itoa(number, poolarea, 10);
+			Edit[18] = CreateWindow("EDIT", "",
+				WS_VISIBLE | WS_CHILD | WS_BORDER | DT_VCENTER, 1020, 410, 100, 20,
+				hwnd, NULL, (HINSTANCE)GetWindowLong(hwnd, GWL_HINSTANCE), NULL);
+			SetWindowText(Edit[18], poolarea);
+			Text[9] = CreateWindow("STATIC", "当前泳池占用金额为",
+				WS_TABSTOP | WS_VISIBLE | WS_CHILD | BS_LEFT, 810, 430, 200, 20,
+				hwnd, NULL, (HINSTANCE)GetWindowLong(hwnd, GWL_HINSTANCE), NULL);
+			Edit[19] = CreateWindow("EDIT", "",
+				WS_VISIBLE | WS_CHILD | WS_BORDER | DT_VCENTER, 1020, 430, 100, 20,
+				hwnd, NULL, (HINSTANCE)GetWindowLong(hwnd, GWL_HINSTANCE), NULL);
+		    number = (int)rectanglep.getarea()*pool.price;
+			itoa(number, poolprice, 10);
+			SetWindowText(Edit[19], poolprice);
+			cost.currentprice = cost.currentprice + rectanglep.getarea()*pool.price;
+			cost.currentarea = cost.currentarea + rectanglep.getarea();
+			int price;
+			double count;
+			count = cost.currentprice;
+			price = count;
+			itoa(price, currentp, 10);
+			SetWindowText(Edit[8], currentp);
+			int area;
+			count = cost.currentarea;
+			area = (int)count;
+			itoa(area, currenta, 10);
+			SetWindowText(Edit[9], currenta);
+		}
+		if ((HWND)lParam == BUTTON[27])
+		{
+			pool = Pool(0);
+			GetWindowText(Edit[15], tria, 64);
+			GetWindowText(Edit[16], trib, 64);
+			GetWindowText(Edit[17], tric, 64);
+			trianglep.a = atof(tria);
+			trianglep.b = atof(trib);
+			trianglep.c = atof(tric);
+			Text[8] = CreateWindow("STATIC", "当前泳池占用土地为",
+				WS_TABSTOP | WS_VISIBLE | WS_CHILD | BS_LEFT, 810, 410, 200, 20,
+				hwnd, NULL, (HINSTANCE)GetWindowLong(hwnd, GWL_HINSTANCE), NULL);
+			int number = (int)trianglep.getarea();
+			itoa(number, poolarea, 10);
+			Edit[18] = CreateWindow("EDIT", "",
+				WS_VISIBLE | WS_CHILD | WS_BORDER | DT_VCENTER, 1020, 410, 100, 20,
+				hwnd, NULL, (HINSTANCE)GetWindowLong(hwnd, GWL_HINSTANCE), NULL);
+			SetWindowText(Edit[18], poolarea);
+			Text[9] = CreateWindow("STATIC", "当前泳池占用金额为",
+				WS_TABSTOP | WS_VISIBLE | WS_CHILD | BS_LEFT, 810, 430, 200, 20,
+				hwnd, NULL, (HINSTANCE)GetWindowLong(hwnd, GWL_HINSTANCE), NULL);
+			number = (int)trianglep.getarea()*pool.price;
+			itoa(number, poolprice, 10);
+			Edit[19] = CreateWindow("EDIT", "",
+				WS_VISIBLE | WS_CHILD | WS_BORDER | DT_VCENTER, 1020, 430, 100, 20,
+				hwnd, NULL, (HINSTANCE)GetWindowLong(hwnd, GWL_HINSTANCE), NULL);
+			SetWindowText(Edit[19], poolprice);
+			cost.currentprice = cost.currentprice + trianglep.getarea()*pool.price;
+			cost.currentarea = cost.currentarea + trianglep.getarea();
+			int price;
+			double count;
+			count = cost.currentprice;
+			price = count;
+			itoa(price, currentp, 10);
+			SetWindowText(Edit[8], currentp);
+			int area;
+			count = cost.currentarea;
+			area = (int)count;
+			itoa(area, currenta, 10);
+			SetWindowText(Edit[9], currenta);
+		}
+		if ((HWND)lParam == BUTTON[28])
+		{
+			pool = Pool(1);
+			GetWindowText(Edit[15], tria, 64);
+			GetWindowText(Edit[16], trib, 64);
+			GetWindowText(Edit[17], tric, 64);
+			trianglep.a = atof(tria);
+			trianglep.b = atof(trib);
+			trianglep.c = atof(tric);
+			Text[8] = CreateWindow("STATIC", "当前泳池占用土地为",
+				WS_TABSTOP | WS_VISIBLE | WS_CHILD | BS_LEFT, 810, 410, 200, 20,
+				hwnd, NULL, (HINSTANCE)GetWindowLong(hwnd, GWL_HINSTANCE), NULL);
+			int number = (int)trianglep.getarea();
+			itoa(number, poolarea, 10);
+			Edit[18] = CreateWindow("EDIT", "",
+				WS_VISIBLE | WS_CHILD | WS_BORDER | DT_VCENTER, 1020, 410, 100, 20,
+				hwnd, NULL, (HINSTANCE)GetWindowLong(hwnd, GWL_HINSTANCE), NULL);
+			SetWindowText(Edit[18], poolarea);
+			Text[9] = CreateWindow("STATIC", "当前泳池占用金额为",
+				WS_TABSTOP | WS_VISIBLE | WS_CHILD | BS_LEFT, 810, 430, 200, 20,
+				hwnd, NULL, (HINSTANCE)GetWindowLong(hwnd, GWL_HINSTANCE), NULL);
+			number = (int)trianglep.getarea()*pool.price;
+			itoa(number, poolprice, 10);
+			Edit[19] = CreateWindow("EDIT", "",
+				WS_VISIBLE | WS_CHILD | WS_BORDER | DT_VCENTER, 1020, 430, 100, 20,
+				hwnd, NULL, (HINSTANCE)GetWindowLong(hwnd, GWL_HINSTANCE), NULL);
+			SetWindowText(Edit[19], poolprice);
+			cost.currentprice = cost.currentprice + trianglep.getarea()*pool.price;
+			cost.currentarea = cost.currentarea + trianglep.getarea();
+			int price;
+			double count;
+			count = cost.currentprice;
+			price = count;
+			itoa(price, currentp, 10);
+			SetWindowText(Edit[8], currentp);
+			int area;
+			count = cost.currentarea;
+			area = (int)count;
+			itoa(area, currenta, 10);
+			SetWindowText(Edit[9], currenta);
+		}
+		if ((HWND)lParam == BUTTON[29])
+		{
+			pool = Pool(2);
+			GetWindowText(Edit[15], tria, 64);
+			GetWindowText(Edit[16], trib, 64);
+			GetWindowText(Edit[17], tric, 64);
+			trianglep.a = atof(tria);
+			trianglep.b = atof(trib);
+			trianglep.c = atof(tric);
+			Text[8] = CreateWindow("STATIC", "当前泳池占用土地为",
+				WS_TABSTOP | WS_VISIBLE | WS_CHILD | BS_LEFT, 810, 410, 200, 20,
+				hwnd, NULL, (HINSTANCE)GetWindowLong(hwnd, GWL_HINSTANCE), NULL);
+			int number = (int)trianglep.getarea();
+			itoa(number,poolarea,10);
+			Edit[18] = CreateWindow("EDIT", "",
+				WS_VISIBLE | WS_CHILD | WS_BORDER | DT_VCENTER, 1020, 410, 100, 20,
+				hwnd, NULL, (HINSTANCE)GetWindowLong(hwnd, GWL_HINSTANCE), NULL);
+			SetWindowText(Edit[18], poolarea);
+			Text[9] = CreateWindow("STATIC", "当前泳池占用金额为",
+				WS_TABSTOP | WS_VISIBLE | WS_CHILD | BS_LEFT, 810, 430, 200, 20,
+				hwnd, NULL, (HINSTANCE)GetWindowLong(hwnd, GWL_HINSTANCE), NULL);
+			 number = (int)trianglep.getarea()*pool.price;
+			itoa(number, poolprice, 10);
+			Edit[19] = CreateWindow("EDIT", "",
+				WS_VISIBLE | WS_CHILD | WS_BORDER | DT_VCENTER, 1020, 430, 100, 20,
+				hwnd, NULL, (HINSTANCE)GetWindowLong(hwnd, GWL_HINSTANCE), NULL);
+			SetWindowText(Edit[19], poolprice);
+			cost.currentprice = cost.currentprice + trianglep.getarea()*pool.price;
+			cost.currentarea = cost.currentarea + trianglep.getarea();
+			int price;
+			double count;
+			count = cost.currentprice;
+			price = count;
+			itoa(price, currentp, 10);
+			SetWindowText(Edit[8], currentp);
+			int area;
+			count = cost.currentarea;
+			area = (int)count;
+			itoa(area, currenta, 10);
+			SetWindowText(Edit[9], currenta);
+		}
+		break;
+	case WM_GETTEXT:
+
+	case WM_PAINT:
+		hdc = BeginPaint(hwnd, &ps);
+		GetClientRect(hwnd, &rect);
+		EndPaint(hwnd, &ps);
+		return 0;
+	}
+	case WM_CLOSE:
+	{
+
+		DestroyWindow(hwnd);
+		PostQuitMessage(0);
+	}
+	break;
+	default:
+		return	DefWindowProc(hwnd, uMsg, wParam, lParam);
+	}
+	return 0;
+}
+int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR pszCmdLine, int cmdShow)
+{
+	WNDCLASS	stWndClass;
+	MSG			stMsg;
+
+	RtlZeroMemory(&stWndClass, sizeof(stWndClass) + sizeof(stMsg)); //填充 WndClass结构 + MSG结构
+	stWndClass.style = CS_VREDRAW | CS_HREDRAW;
+	stWndClass.lpfnWndProc = &WindowProc;
+	stWndClass.hInstance = hInstance;
+	stWndClass.hIcon = LoadIcon(NULL, IDI_APPLICATION);
+	stWndClass.hCursor = LoadCursor(NULL, IDC_ARROW);
+	stWndClass.hbrBackground = (HBRUSH)COLOR_WINDOW;
+	stWndClass.lpszClassName = szClassName;
+
+	//注册窗口类
+
+	RegisterClass(&stWndClass);
+
+	//创建窗口
+
+	hParent = CreateWindowEx(0, szClassName, "Hollow world", WS_OVERLAPPEDWINDOW,
+		CW_USEDEFAULT, CW_USEDEFAULT, CW_USEDEFAULT, CW_USEDEFAULT, NULL, NULL, hInstance, NULL);
+
+	if (!hParent)
+		return 0;
+
+	//显示窗口
+	ShowWindow(hParent, SW_SHOWNORMAL);
+
+	//刷新客户区
+	UpdateWindow(hParent);
+
+
+	//消息循环
+	while (GetMessage(&stMsg, NULL, 0, 0) != 0)
+	{
+
+		TranslateMessage(&stMsg);
+		DispatchMessage(&stMsg);
+
+	}
+
+	return	stMsg.wParam;
+}
