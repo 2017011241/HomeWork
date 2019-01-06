@@ -1,0 +1,15 @@
+#pragma once
+#include<iostream>
+using namespace std;
+class Cost
+{
+public:
+double currentprice;
+double complectprice;
+double currentarea;
+double complectarea;
+public:
+	Cost(double a,double p);
+int waring(double currentprice,double currentdouble);
+void reporting();
+};
